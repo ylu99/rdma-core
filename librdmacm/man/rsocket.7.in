@@ -25,7 +25,7 @@ rrecv, rrecvfrom, rrecvmsg, rread, rreadv
 .P
 rsend, rsendto, rsendmsg, rwrite, rwritev
 .P
-rpoll, rselect
+rpoll, rselect, repoll_create, repoll_create1, repoll_ctl, repoll_wait
 .P
 rgetpeername, rgetsockname
 .P
@@ -44,6 +44,18 @@ IPPROTO_TCP - TCP_NODELAY, TCP_MAXSEG
 IPPROTO_IPV6 - IPV6_V6ONLY
 .P
 MSG_DONTWAIT, MSG_PEEK, O_NONBLOCK
+.P
+Because rsockets map to user space data structures and not kernel file
+descriptors, an rsocket may not be used directly in place of calls that
+accept an fd.  Notably, the following calls that are frequently used
+with sockets are not usable: select, poll, epoll.  However, rsocket
+versions of those calls are available: rselect, rpoll, repoll_wait.
+The rsocket verions work with rsockets, normal sockets, and standard
+file descriptors.  The rsocket support for epoll has an additional
+restrictions.  When calling repoll_wait, all rsockets must be associated
+with the epfd (epoll file descriptor) passed directly into the wait
+call.  That is, nesting of epoll fd's is not supported.  Calls to
+repoll_wait and repoll_ctl must be serialized.
 .P
 Rsockets provides extensions beyond normal socket routines that
 allow for direct placement of data into an application's buffer.
@@ -127,6 +139,8 @@ set the environment variable RDMAV_FORK_SAFE=1 on both the client
 and server side of the connection.  In general, fork is
 supportable for server applications that accept a connection, then
 fork off a process to handle the new connection.
+.P
+Preload support for epoll is not available at this time.
 .P
 rsockets uses configuration files that give an administrator control
 over the default settings used by rsockets.  Use files under

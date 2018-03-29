@@ -76,3 +76,10 @@ RDMACM_1.1 {
 	global:
 		rdma_join_multicast_ex;
 } RDMACM_1.0;
+
+RDMACM_1.2 {
+	global:
+		repoll_create;
+		repoll_ctl;
+		repoll_wait;
+} RDMACM_1.0;
